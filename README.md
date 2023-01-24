@@ -4,6 +4,26 @@ The [PowerShell-docs](https://github.com/MicrosoftDocs/PowerShell-Docs/) hosts a
 
 This repository performs (pester) tests against the PowerShell-Docs repo, making it easier to know what to focus on as an individual contributor. The main goal of this repository, as a start, is to test the [Alias notes section](https://learn.microsoft.com/en-gb/powershell/scripting/community/contributing/quality-improvements?view=powershell-7.2#aliases).
 
+
+
+## Pre-req
+
+- Pester 5+ (`Install-Module Pester -AllowPrerelease -Force -Verbose`)
+- PowerShell 7
+- git
+
+## Step-by-step
+
+1. Clone this repository
+2. Clone PowerShell-Docs in the same folder:
+```text
+root
+└───gitfolder
+    ├───PowerShell-Docs
+    └───PowerShell-Docs-CommunityTests
+```
+1. Run Invoke-CommunityTests.ps1
+
 ## List of tests
 
 - Test if there are any alias notes
