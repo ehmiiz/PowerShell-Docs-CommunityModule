@@ -15,7 +15,7 @@ This repository performs (pester) tests against the PowerShell-Docs repo, making
 ## Step-by-step
 
 1. Clone this repository
-2. Clone PowerShell-Docs in the same folder:
+2. Clone PowerShell-Docs under it:
 ```text
 root
 └───gitfolder
@@ -23,6 +23,7 @@ root
     └───PowerShell-Docs-CommunityTests
 ```
 1. Run Invoke-CommunityTests.ps1
+2. Fix a failed test by contributing to the PowerShell docs [See contributing guide](https://learn.microsoft.com/en-gb/PowerShell/scripting/community/contributing/overview?view=powershell-7.3)
 
 ## List of tests
 
