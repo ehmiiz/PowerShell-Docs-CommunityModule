@@ -9,7 +9,7 @@
 BeforeAll {
     $Global:DocsPath = (Get-Item "$PSScriptRoot\..\..\PowerShell-Docs").FullName
     $Global:WinPowerShellPath = "$Global:DocsPath\reference\5.1"
-    $Global:ShouldHaveAliasNotes = powershell -NoProfile -c "Get-Alias | Select-Object Definition -Unique" | Where-Object {$_ -like "*-*"} #TODO: Make this more exact 
+    $Global:ShouldHaveAliasNotes = powershell -NoProfile -c "Get-Alias | Select-Object Definition -Unique" | Where-Object {$_ -like "*-*"}
 }
 
 Describe '5.1 Alias Notes' {
@@ -21,12 +21,12 @@ Describe '5.1 Alias Notes' {
     # Bulk approach
     It 'Contains new alias notes style' -ForEach $Global:ShouldHaveAliasNotes {
 
-        $ModuleForPath = powershell -c "Get-Command $_ | Select-Object -Expandproperty Source" #TODO: This is not optimal, should be more exact
+        $ModuleForPath = powershell -c "Get-Command $_ | Select-Object -Expandproperty Source"
         $PathToCmdletDoc = "$Global:WinPowerShellPath\$ModuleForPath\$($_.trim(" ")).md"
 
         if (Test-Path $PathToCmdletDoc) {
             $TestContent = Get-Content $PathToCmdletDoc | Select-String -Pattern '## NOTES' -Context 0, 2
-            $TestContent | Should -Match 'Windows PowerShell includes the following aliases for' #TODO: Fix output so it's clear what needs to be added
+            $TestContent | Should -Match 'Windows PowerShell includes the following aliases for'
         }
         else {
             Write-Warning "Could not find path: $PathToCmdletDoc"
