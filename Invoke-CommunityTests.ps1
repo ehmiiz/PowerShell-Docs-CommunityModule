@@ -1,8 +1,9 @@
 # Invoke all tests
-$script:DocsRepo = "$PSScriptRoot\..\PowerShell-Docs"
+$script:DocsRepo = (Get-Item "$PSScriptRoot\..\PowerShell-Docs").FullName
 
 if (Test-Path $script:DocsRepo) {
-    Invoke-Pester .\tests\*
+    "found $script:DocsRepo"
+    Invoke-Pester $PSScriptRoot\tests\*
 }
 else {
     Write-Error "Missing PowerShell-Docs repo above the scriptroot." -ErrorAction Stop

@@ -7,8 +7,9 @@
 #>
 
 BeforeAll {
-    $Global:WinPowerShellPath = "$PSScriptRoot\..\..\PowerShell-Docs\reference\5.1"
-    $Global:ShouldHaveAliasNotes = powershell {(Get-Alias).Definition | Sort-Object | Get-Unique } #TODO: Make this more exact 
+    $Global:DocsPath = (Get-Item "$PSScriptRoot\..\..\PowerShell-Docs").FullName
+    $Global:WinPowerShellPath = "$Global:DocsPath\reference\5.1"
+    $Global:ShouldHaveAliasNotes = powershell -NoProfile -c "Get-Alias | Select-Object Definition -Unique" | Where-Object {$_ -like "*-*"} #TODO: Make this more exact 
 }
 
 Describe '5.1 Alias Notes' {
@@ -20,8 +21,8 @@ Describe '5.1 Alias Notes' {
     # Bulk approach
     It 'Contains new alias notes style' -ForEach $Global:ShouldHaveAliasNotes {
 
-        $ModuleForPath = (Get-Command $_).Source #TODO: This is not optimal, should be more exact
-        $PathToCmdletDoc = "$Global:WinPowerShellPath\$ModuleForPath\$_.md"
+        $ModuleForPath = powershell -c "Get-Command $_ | Select-Object -Expandproperty Source" #TODO: This is not optimal, should be more exact
+        $PathToCmdletDoc = "$Global:WinPowerShellPath\$ModuleForPath\$($_.trim(" ")).md"
 
         if (Test-Path $PathToCmdletDoc) {
             $TestContent = Get-Content $PathToCmdletDoc | Select-String -Pattern '## NOTES' -Context 0, 2
