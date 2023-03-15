@@ -1,0 +1,1 @@
+# https://learn.microsoft.com/powershell/scripting/community/contributing/quality-improvements?view=powershell-7.2#link-references
