@@ -26,13 +26,14 @@ if ( -not $LocalPowerShellDocsPath) {
 Write-Verbose -Message "Building alias cmdlet arrays.."
 
 if ($IsWindows) {
-    $WindowsPowerShellAliases = powershell -NoProfile -c "Get-Alias | Select-Object -ExpandProperty Definition" | Where-Object {$_ -match '^[A-Z][a-z]+(-[A-Z][a-z]+)+$'}
+    $WindowsPowerShellAliases = powershell -NoProfile -c "Get-Alias | Select-Object -ExpandProperty Definition" | Where-Object { $_ -match '^[A-Z][a-z]+(-[A-Z][a-z]+)+$' }
     $WindowsPowerShellAliases = $WindowsPowerShellAliases + "Get-Clipboard", "Get-ComputerInfo", "Get-TimeZone", "Set-Clipboard", "Set-TimeZone"
-} else {
+}
+else {
     Write-Warning "Skipping 5.1 since we're not on windows."
 }
 
-$PowerShellAliases = pwsh -NoProfile -c "Get-Alias | Select-Object -ExpandProperty Definition" | Where-Object {$_ -match '^[A-Z][a-z]+(-[A-Z][a-z]+)+$'}
+$PowerShellAliases = pwsh -NoProfile -c "Get-Alias | Select-Object -ExpandProperty Definition" | Where-Object { $_ -match '^[A-Z][a-z]+(-[A-Z][a-z]+)+$' }
 $PowerShellAliases = $PowerShellAliases + "Get-Clipboard", "Get-ComputerInfo", "Get-TimeZone", "Set-Clipboard", "Set-TimeZone"
 
 if ($WindowsPowerShellAliases) {
@@ -41,14 +42,15 @@ if ($WindowsPowerShellAliases) {
         $WindowsPowerShellCmdletPath += Get-ChildItem -Path "$LocalPowerShellDocsPath\reference\5.1" -Filter "*$($_).md" -Recurse | Select-Object -ExpandProperty FullName
     }
 
-    $WindowsPowerShellCmdletPath | ForEach-Object {
-        if (Select-String -Path $_ -Pattern $aliasPattern51) { # TODO Fix this so it works
-            "$_ has alias notes!"
+    foreach ($wp in $WindowsPowerShellCmdletPath) {
+        if (Select-String -Path $wp -Pattern $aliasPattern51) {
+            # TODO Fix this so it works
+            "$wp has alias notes!"
         }
         else {
-            "$_ lacks alias notes :("
+            "$wp lacks alias notes :("
         }
     }
+    
+
 }
-
-
