@@ -1,25 +1,54 @@
 <#
-    - Test if there are any alias notes
-    - Test if they are following the agreed format
-    - 5.1 alias sections should contain `Windows PowerShell`
-    - 7.x alias sections should contain `PowerShell`
-    - Test if the aliases work as the docs describe
+    1. Find the PowerShell-Docs repo path locally, store in var
+    2. Find all cmdlets with aliases
+    3. Look for alias notes pattern in ## NOTES, should start with 'Windows PowerShell includes the following aliases for' for 5.1 cmdlets, and 'PowerShell includes the following aliases for' for newer versions
+    4. Loop through all cmdlets from step 2 and see if they match the pattern in step 3
+    5. Return result
 #>
 
-$Global:DocsPath = (Get-Item "$PSScriptRoot\..\..\PowerShell-Docs").FullName
-$Global:WinPowerShellPath = "$Global:DocsPath\reference\5.1"
-$Global:ShouldHaveAliasNotes = powershell -NoProfile -c "Get-Alias | Select-Object Definition -Unique" | Where-Object {$_ -like "*-*"}
+# Build patterns
+$aliasPattern51 = "## NOTES`r`n.+?Windows PowerShell includes the following aliases for.+?`r`n"
+$aliasPatternNew = "## NOTES`r`n.+?PowerShell includes the following aliases for.+?`r`n"
 
-if (Test-Path $Global:WinPowerShellPath)
-{
-    $ModuleForPath = powershell -c "Get-Command $_ | Select-Object -Expandproperty Source"
-    $PathToCmdletDoc = "$Global:WinPowerShellPath\$ModuleForPath\$($_.trim(" ")).md"
+# Find the local PowerShell-Docs path
+Write-Verbose -Message "Searching for Local PowerShell-Docs repo path.."
 
-    if (Test-Path $PathToCmdletDoc) {
-        $TestContent = Get-Content $PathToCmdletDoc | Select-String -Pattern '## NOTES' -Context 0, 2
-        $TestContent -match 'Windows PowerShell includes the following aliases for'
+$LocalPowerShellDocsPath = (Get-ChildItem -Path $env:USERPROFILE -Filter "PowerShell-Docs" -Recurse).FullName
+
+if ( -not $LocalPowerShellDocsPath) {
+    $LocalPowerShellDocsPath = (Get-ChildItem -Path $env:SystemDrive -Filter "PowerShell-Docs" -Recurse).FullName
+}
+
+if ( -not $LocalPowerShellDocsPath) { 
+    Write-Error "This function only supports having the PowerShell-Docs repo in the system drive." -ErrorAction Stop
+}
+
+Write-Verbose -Message "Building alias cmdlet arrays.."
+
+if ($IsWindows) {
+    $WindowsPowerShellAliases = powershell -NoProfile -c "Get-Alias | Select-Object -ExpandProperty Definition" | Where-Object {$_ -match '^[A-Z][a-z]+(-[A-Z][a-z]+)+$'}
+    $WindowsPowerShellAliases = $WindowsPowerShellAliases + "Get-Clipboard", "Get-ComputerInfo", "Get-TimeZone", "Set-Clipboard", "Set-TimeZone"
+} else {
+    Write-Warning "Skipping 5.1 since we're not on windows."
+}
+
+$PowerShellAliases = pwsh -NoProfile -c "Get-Alias | Select-Object -ExpandProperty Definition" | Where-Object {$_ -match '^[A-Z][a-z]+(-[A-Z][a-z]+)+$'}
+$PowerShellAliases = $PowerShellAliases + "Get-Clipboard", "Get-ComputerInfo", "Get-TimeZone", "Set-Clipboard", "Set-TimeZone"
+
+if ($WindowsPowerShellAliases) {
+    $WindowsPowerShellCmdletPath = @()
+    $WindowsPowerShellAliases | ForEach-Object {
+        $WindowsPowerShellCmdletPath += Get-ChildItem -Path "$LocalPowerShellDocsPath\reference\5.1" -Filter "*$($_).md" -Recurse | Select-Object -ExpandProperty FullName
     }
-    else {
-        Write-Warning "Could not find path: $PathToCmdletDoc"
+
+    $WindowsPowerShellCmdletPath | ForEach-Object {
+        if (Select-String -Path $_ -Pattern $aliasPattern51) { # TODO Fix this so it works
+            "$_ has alias notes!"
+        }
+        else {
+            "$_ lacks alias notes :("
+        }
     }
 }
+
+
