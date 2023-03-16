@@ -6,51 +6,65 @@
     5. Return result
 #>
 
-# Build patterns
-$aliasPattern51 = "## NOTES`r`n.+?Windows PowerShell includes the following aliases for.+?`r`n"
-$aliasPatternNew = "## NOTES`r`n.+?PowerShell includes the following aliases for.+?`r`n"
+Function Find-MissingAliasNotes {
 
-# Find the local PowerShell-Docs path
-Write-Verbose -Message "Searching for Local PowerShell-Docs repo path.."
+    # Build patterns
+    $aliasPattern51 = "Windows PowerShell includes the following aliases for"
+    $aliasPatternNew = "PowerShell includes the following aliases for"
 
-$LocalPowerShellDocsPath = (Get-ChildItem -Path $env:USERPROFILE -Filter "PowerShell-Docs" -Recurse).FullName
+    # Find the local PowerShell-Docs path
+    Write-Verbose -Message "Searching for Local PowerShell-Docs repo path.."
 
-if ( -not $LocalPowerShellDocsPath) {
-    $LocalPowerShellDocsPath = (Get-ChildItem -Path $env:SystemDrive -Filter "PowerShell-Docs" -Recurse).FullName
-}
+    $LocalPowerShellDocsPath = (Get-ChildItem -Path $env:USERPROFILE -Filter "PowerShell-Docs" -Recurse).FullName
 
-if ( -not $LocalPowerShellDocsPath) { 
-    Write-Error "This function only supports having the PowerShell-Docs repo in the system drive." -ErrorAction Stop
-}
-
-Write-Verbose -Message "Building alias cmdlet arrays.."
-
-if ($IsWindows) {
-    $WindowsPowerShellAliases = powershell -NoProfile -c "Get-Alias | Select-Object -ExpandProperty Definition" | Where-Object { $_ -match '^[A-Z][a-z]+(-[A-Z][a-z]+)+$' }
-    $WindowsPowerShellAliases = $WindowsPowerShellAliases + "Get-Clipboard", "Get-ComputerInfo", "Get-TimeZone", "Set-Clipboard", "Set-TimeZone"
-}
-else {
-    Write-Warning "Skipping 5.1 since we're not on windows."
-}
-
-$PowerShellAliases = pwsh -NoProfile -c "Get-Alias | Select-Object -ExpandProperty Definition" | Where-Object { $_ -match '^[A-Z][a-z]+(-[A-Z][a-z]+)+$' }
-$PowerShellAliases = $PowerShellAliases + "Get-Clipboard", "Get-ComputerInfo", "Get-TimeZone", "Set-Clipboard", "Set-TimeZone"
-
-if ($WindowsPowerShellAliases) {
-    $WindowsPowerShellCmdletPath = @()
-    $WindowsPowerShellAliases | ForEach-Object {
-        $WindowsPowerShellCmdletPath += Get-ChildItem -Path "$LocalPowerShellDocsPath\reference\5.1" -Filter "*$($_).md" -Recurse | Select-Object -ExpandProperty FullName
+    if ( -not $LocalPowerShellDocsPath) {
+        $LocalPowerShellDocsPath = (Get-ChildItem -Path $env:SystemDrive -Filter "PowerShell-Docs" -Recurse).FullName
     }
 
-    foreach ($wp in $WindowsPowerShellCmdletPath) {
-        if (Select-String -Path $wp -Pattern $aliasPattern51) {
-            # TODO Fix this so it works
-            "$wp has alias notes!"
+    if ( -not $LocalPowerShellDocsPath) { 
+        Write-Error "This function only supports having the PowerShell-Docs repo in the system drive." -ErrorAction Stop
+    }
+
+    Write-Verbose -Message "Building alias cmdlet arrays.."
+
+    if ($IsWindows) {
+        $WindowsPowerShellAliases = powershell -NoProfile -c "Get-Alias | Select-Object -ExpandProperty Definition" | Where-Object { $_ -match '^[A-Z][a-z]+(-[A-Z][a-z]+)+$' }
+        $WindowsPowerShellAliases = $WindowsPowerShellAliases + "Get-Clipboard", "Get-ComputerInfo", "Get-TimeZone", "Set-Clipboard", "Set-TimeZone"
+    }
+    else {
+        Write-Warning "Skipping 5.1 since we're not on windows."
+    }
+
+    $PowerShellAliases = pwsh -NoProfile -c "Get-Alias | Select-Object -ExpandProperty Definition" | Where-Object { $_ -match '^[A-Z][a-z]+(-[A-Z][a-z]+)+$' }
+    $PowerShellAliases = $PowerShellAliases + "Get-Clipboard", "Get-ComputerInfo", "Get-TimeZone", "Set-Clipboard", "Set-TimeZone"
+
+
+    Write-Output "PowerShell 5.1: The following files lacks alias notes:"
+    if ($WindowsPowerShellAliases) {
+        $WindowsPowerShellCmdletPath = @()
+        $WindowsPowerShellAliases | ForEach-Object {
+            $WindowsPowerShellCmdletPath += Get-ChildItem -Path "$LocalPowerShellDocsPath\reference\5.1" -Filter "*$($_).md" -Recurse | Select-Object -ExpandProperty FullName
         }
-        else {
-            "$wp lacks alias notes :("
+
+        foreach ($wp in $WindowsPowerShellCmdletPath) {
+            if (-not (Get-Content $wp | Where-Object { $_ -match $aliasPattern51 })) {
+                $wp       
+            }
         }
     }
-    
 
+
+    Write-Output "PowerShell 7+: The following files lacks alias notes:"
+    if ($PowerShellAliases) {
+        $PowerShellCmdletPath = @()
+        $PowerShellAliases | ForEach-Object {# Update Path when PowerShell 8 
+            $PowerShellCmdletPath += Get-ChildItem -Path "$LocalPowerShellDocsPath\reference\7*" -Filter "*$($_).md" -Recurse | Select-Object -ExpandProperty FullName
+        }
+
+        foreach ($pp in $PowerShellCmdletPath) {
+            if (-not (Get-Content $pp | Where-Object { $_ -match $aliasPatternNew })) {
+                $pp
+            }
+        }
+    }
 }
