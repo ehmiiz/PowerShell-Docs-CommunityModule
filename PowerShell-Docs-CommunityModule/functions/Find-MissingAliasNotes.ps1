@@ -29,7 +29,7 @@ Function Find-MissingAliasNotes {
 
     Write-Verbose -Message "Building alias cmdlet arrays.."
 
-    if ($IsWindows) {
+    if ($IsWindows -or $PSVersionTable.PSVersion.Major -ge 5) {
         $WindowsPowerShellAliases = powershell -NoProfile -c "Get-Alias | Select-Object -ExpandProperty Definition" | Where-Object { $_ -match '^[A-Z][a-z]+(-[A-Z][a-z]+)+$' }
         $WindowsPowerShellAliases = $WindowsPowerShellAliases + "Get-Clipboard", "Get-ComputerInfo", "Get-TimeZone", "Set-Clipboard", "Set-TimeZone"
     }
