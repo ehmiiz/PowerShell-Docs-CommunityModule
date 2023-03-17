@@ -1,11 +1,3 @@
-<#
-    1. Find the PowerShell-Docs repo path locally, store in var
-    2. Find all cmdlets with aliases
-    3. Look for alias notes pattern in ## NOTES, should start with 'Windows PowerShell includes the following aliases for' for 5.1 cmdlets, and 'PowerShell includes the following aliases for' for newer versions
-    4. Loop through all cmdlets from step 2 and see if they match the pattern in step 3
-    5. Return result
-#>
-
 Function Find-MissingAliasNotes {
     [CmdletBinding(SupportsShouldProcess)]
     param()
