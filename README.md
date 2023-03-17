@@ -2,36 +2,38 @@
 
 The [PowerShell-docs](https://github.com/MicrosoftDocs/PowerShell-Docs/) hosts a community driven project called [PowerShell Docs Quality Contributions](https://github.com/orgs/MicrosoftDocs/projects/15)
 
-This repository performs (pester) tests against the PowerShell-Docs repo, making it easier to know what to focus on as an individual contributor. The main goal of this repository, as a start, is to test the [Alias notes section](https://learn.microsoft.com/en-gb/powershell/scripting/community/contributing/quality-improvements?view=powershell-7.2#aliases).
+This module verifies a level of quality to the PowerShell-Docs repo, making it easy for you as a community contributor to know what to focus on.
 
+Example:
 
+```powershell
+Set-Location $env:USERPROFILE
 
-## Pre-req
+git clone https://github.com/username/PowerShell-Docs-CommunityTests
 
-- Pester 5+ (`Install-Module Pester -AllowPrerelease -Force -Verbose`)
-- PowerShell 7
-- git
+Import-Module PowerShell-Docs-CommunityModule
+
+Find-MissingAliasNotes -Verbose
+```
+
 
 ## Step-by-step
 
-1. Clone this repository
+1. Install the PowerShell-Docs-CommunityModule
 2. Clone PowerShell-Docs under it:
 ```text
-root
+systemroot/userprofile
 └───gitfolder
     ├───PowerShell-Docs
     └───PowerShell-Docs-CommunityTests
 ```
-1. Run Invoke-CommunityTests.ps1
-2. Fix a failed test by contributing to the PowerShell docs [See contributing guide](https://learn.microsoft.com/en-gb/PowerShell/scripting/community/contributing/overview?view=powershell-7.3)
+3. Run the commands to figure out what to work on
+4. Follow the [Contribution Guidelines](https://learn.microsoft.com/powershell/scripting/community/contributing/quality-improvements?view=powershell-7.2#aliases)
 
-## List of tests
-
-- Test if there are any alias notes
-- Test if they are following the agreed format
-  - 5.1 alias sections should contain `Windows PowerShell`
-  - 7.x alias sections should contain `PowerShell`
-- Test if the aliases work as the docs describe
+## Planned functions
+- [Find-MissingAliasNotes](https://learn.microsoft.com/powershell/scripting/community/contributing/quality-improvements?view=powershell-7.2#aliases)
+- [Find-LegacyLinkReference](https://learn.microsoft.com/powershell/scripting/community/contributing/quality-improvements?view=powershell-7.2#link-references)
+- [Find-DocsTypo](https://learn.microsoft.com/powershell/scripting/community/contributing/quality-improvements?view=powershell-7.2#spelling)
 
 ## Contribute to this repository
 
