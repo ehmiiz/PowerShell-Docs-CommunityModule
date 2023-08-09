@@ -34,31 +34,32 @@ Function Find-MissingAliasNotes {
 
     Write-Verbose -Message "Displaying output for 5.1 cmdlets.."
     Write-Output "PowerShell 5.1: The following files lacks alias notes:"
-    if ($WindowsPowerShellAliases) {
-        $WindowsPowerShellCmdletPath = @()
-        $WindowsPowerShellAliases | ForEach-Object {
-            $WindowsPowerShellCmdletPath += Get-ChildItem -Path "$LocalPowerShellDocsPath\reference\5.1" -Filter "*$($_).md" -Recurse | Select-Object -ExpandProperty FullName
-        }
 
-        foreach ($wp in $WindowsPowerShellCmdletPath) {
-            if (-not (Get-Content $wp | Where-Object { $_ -match $aliasPattern51 })) {
-                $wp       
-            }
+    $WinPowerShellCmdletPath = @()
+    $WindowsPowerShellAliases | ForEach-Object {
+        $CurrentAliasCmdlet = $_
+        $WinPowerShellCmdletPath += Get-ChildItem  "$LocalPowerShellDocsPath\reference\5.1\*$_*.md" -Depth 3 | Select-Object -ExpandProperty FullName | Where-Object { $_ -clike "*$CurrentAliasCmdlet.md" }
+    }
+
+    foreach ($ww in $WinPowerShellCmdletPath) {
+        if (-not (Get-Content $ww | Where-Object { $_ -match $aliasPattern51 })) {
+            $ww
         }
     }
 
     Write-Verbose -Message "Displaying output for 7+ cmdlets.."
     Write-Output "PowerShell 7+: The following files lacks alias notes:"
-    if ($PowerShellAliases) {
-        $PowerShellCmdletPath = @()
-        $PowerShellAliases | ForEach-Object { # Update Path when PowerShell 8 
-            $PowerShellCmdletPath += Get-ChildItem -Path "$LocalPowerShellDocsPath\reference\7*" -Filter "*$($_).md" -Recurse | Select-Object -ExpandProperty FullName
-        }
 
-        foreach ($pp in $PowerShellCmdletPath) {
-            if (-not (Get-Content $pp | Where-Object { $_ -match $aliasPatternNew })) {
-                $pp
-            }
+    $PowerShellCmdletPath = @()
+    $PowerShellAliases | ForEach-Object {
+        $CurrentAliasCmdlet = $_
+        $PowerShellCmdletPath += Get-ChildItem  "$LocalPowerShellDocsPath\reference\7*\*$_*.md" -Depth 3 | Select-Object -ExpandProperty FullName | Where-Object { $_ -clike "*$CurrentAliasCmdlet.md" }
+    }
+
+    foreach ($pp in $PowerShellCmdletPath) {
+        if (-not (Get-Content $pp | Where-Object { $_ -match $aliasPatternNew })) {
+            $pp
         }
     }
+
 }
